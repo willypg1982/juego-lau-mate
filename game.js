@@ -1329,20 +1329,21 @@ ${
       const el = document.getElementById(id);
       if (!el) return;
       const start = (e) => {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         state.autoPilot = false;
         keys[keyName] = true;
         el.classList.add("active");
       };
-      const end = (e) => {
-        e.preventDefault();
+      const end = () => {
+        if (!keys[keyName]) return;
         keys[keyName] = false;
         el.classList.remove("active");
       };
       el.addEventListener("mousedown", start);
       el.addEventListener("touchstart", start, { passive: false });
+      el.addEventListener("touchend", end);
+      el.addEventListener("touchcancel", end);
       window.addEventListener("mouseup", end);
-      window.addEventListener("touchend", end);
     };
 
     bindHoldButton("btn-up", "forward");
@@ -1528,11 +1529,15 @@ ${
   }
 
   window.addEventListener("DOMContentLoaded", () => {
-    initThreeScene();
     setupEventListeners();
-    state.questions = selectBalancedQuestions(10);
-    buildObbyCourse();
-    state.isModalOpen = true;
-    requestAnimationFrame(animate);
+    try {
+      initThreeScene();
+      state.questions = selectBalancedQuestions(10);
+      buildObbyCourse();
+      state.isModalOpen = true;
+      requestAnimationFrame(animate);
+    } catch (err) {
+      console.error("Error iniciando escena 3D:", err);
+    }
   });
 })();

@@ -22,6 +22,11 @@
   padding: 0;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button, label {
+  touch-action: manipulation;
 }
 
 body, html {
@@ -392,8 +397,11 @@ canvas {
   background: #ffffff;
   width: 100%;
   max-width: 720px;
-  max-height: 92vh;
+  max-height: 90vh;
+  max-height: 88dvh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   border-radius: 26px;
   border: 4px solid #e2e8f0;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55);
