@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MateBlox Obby 3D - Práctica y Examen Interactivo de Matemáticas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Contenedor del Mundo 3D estilo Roblox Obby -->
+  <div id="game-canvas-container"></div>
+
+  <!-- HUD Superior estilo Roblox -->
+  <header class="hud-top">
+    <div class="hud-brand">
+      <div class="roblox-logo-cube">M</div>
+      <div class="hud-title-box">
+        <h1>MATEBLOX OBBY 3D</h1>
+        <span id="hud-mode-indicator">📘 Modo Práctica</span>
+      </div>
+    </div>
+
+    <div class="hud-progress-wrapper">
+      <div class="hud-progress-header">
+        <span id="hud-stage-label">Pregunta 1 de 10</span>
+        <span id="hud-world-pill" class="world-pill">Tiempo ⏰</span>
+      </div>
+      <div class="progress-track">
+        <div id="hud-progress-fill" class="progress-fill"></div>
+      </div>
+    </div>
+
+    <div class="hud-stats">
+      <div class="stat-pill good" title="Respuestas Buenas">
+        ✅ Buenas: <span id="hud-good">0</span>
+      </div>
+      <div class="stat-pill bad" title="Respuestas Malas">
+        ❌ Malas: <span id="hud-bad">0</span>
+      </div>
+      <div class="stat-pill coins" title="Monedas Obby">
+        🪙 <span id="hud-coins">0</span>
+      </div>
+      <button id="btn-open-study-hud" class="hud-btn hud-btn-study" type="button">
+        📚 Ver Ficha
+      </button>
+      <button id="btn-autopilot-hud" class="hud-btn hud-btn-autopilot" type="button">
+        ⚡ Ir al Portal
+      </button>
+      <button id="btn-music-toggle" class="hud-btn hud-btn-music" type="button" title="Activar o pausar la melodía mágica estilo Harry Potter">
+        🎵 Música Mágica: ON
+      </button>
+      <label for="custom-mp3-input" class="hud-btn hud-btn-mp3" title="Elegir un archivo MP3 desde tu computadora">
+        📂 Poner MP3
+      </label>
+      <input id="custom-mp3-input" type="file" accept="audio/*" style="display: none;" />
+      <button id="btn-sound-toggle" class="hud-btn hud-btn-sound" type="button">
+        🔊 Efectos: ON
+      </button>
+    </div>
+  </header>
+  <audio id="bg-custom-audio" loop preload="auto" src="assets/harry_potter.mp3"></audio>
+
+  <!-- Banner de Objetivo Actual -->
+  <div class="objective-banner">
+    <span id="objective-text">🎯 Avanza por los bloques hasta el Portal #1 para contestar la pregunta</span>
+    <button id="btn-autopilot-banner" type="button">⚡ Avanzar Automático</button>
+  </div>
+
+  <!-- Controles en Pantalla (Para tablet, celular o mouse) -->
+  <div class="controls-bottom">
+    <div class="dpad-container" aria-label="Controles de movimiento">
+      <div></div>
+      <button id="btn-up" class="ctrl-btn" type="button" title="Avanzar (W / Flecha Arriba)">▲</button>
+      <div></div>
+      <button id="btn-left" class="ctrl-btn" type="button" title="Izquierda (A / Flecha Izquierda)">◀</button>
+      <button id="btn-down" class="ctrl-btn" type="button" title="Retroceder (S / Flecha Abajo)">▼</button>
+      <button id="btn-right" class="ctrl-btn" type="button" title="Derecha (D / Flecha Derecha)">▶</button>
+    </div>
+
+    <div class="action-buttons-right">
+      <div class="keyboard-hint">
+        ⌨️ Usa <strong>W, A, S, D</strong> o <strong>Flechas</strong> para correr y <strong>ESPACIO</strong> para saltar
+      </div>
+      <button id="btn-jump" class="jump-btn" type="button">
+        ⬆️<span>SALTAR</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================================================================
+       1. MODAL DE BIENVENIDA Y CONFIGURACIÓN (PRÁCTICA VS EXAMEN)
+       ================================================================== -->
+  <div id="start-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="start-header">
+        <span class="start-badge">🎮 Modo Obby Roblox 3D • Matemáticas</span>
+        <h2>¡Bienvenido a MateBlox Obby!</h2>
+        <p>Corre y salta con tu personaje por las islas flotantes. En cada portal deberás resolver una pregunta <strong>marcando con X</strong> para desbloquear el puente.</p>
+      </div>
+
+      <div class="topics-grid">
+        <div class="topic-mini-card">
+          <span>⏰</span>
+          1. Tiempo y Conversiones
+        </div>
+        <div class="topic-mini-card">
+          <span>🌡️</span>
+          2. Temperatura (°C y °F)
+        </div>
+        <div class="topic-mini-card">
+          <span>✨</span>
+          3. Expresiones Matemáticas
+        </div>
+        <div class="topic-mini-card">
+          <span>🏰</span>
+          4. ¡Repaso Mágico! en Tablas
+        </div>
+      </div>
+
+      <!-- Selección de Modalidad: PRÁCTICA vs EXAMEN -->
+      <div class="config-section">
+        <label class="section-label">🎯 1. Elige la Modalidad (Práctica o Examen):</label>
+        <div class="exam-type-grid">
+          <button type="button" class="exam-type-btn selected" data-exam-type="practice">
+            <div class="exam-type-title">📘 MODO PRÁCTICA (Con Ayudas)</div>
+            <small>Incluye botón de <strong>💡 Pista</strong> y botón de <strong>📖 Ver Ficha</strong>. Al final muestra en cuáles preguntas usaste pistas o viste la ficha.</small>
+          </button>
+          <button type="button" class="exam-type-btn" data-exam-type="exam">
+            <div class="exam-type-title">🎓 MODO EXAMEN OFICIAL (Sin Ayudas)</div>
+            <small>Para aplicar lo aprendido: <strong>SIN pistas y SIN ver las fichas de materia</strong>. ¡Demuestra todo lo que sabes!</small>
+          </button>
+        </div>
+      </div>
+
+      <!-- Selección de Cantidad de Preguntas -->
+      <div class="config-section">
+        <label class="section-label">📝 2. Elige la cantidad de preguntas:</label>
+        <div class="mode-selector-grid">
+          <button type="button" class="mode-option-btn selected" data-count="10">
+            <strong>⭐ 10 Preguntas</strong>
+            <small>Recomendado • Cada una vale 10 pts (Nota de 0 a 100)</small>
+          </button>
+          <button type="button" class="mode-option-btn" data-count="15">
+            <strong>🚀 15 Preguntas</strong>
+            <small>Recorrido intermedio por los 4 mundos</small>
+          </button>
+          <button type="button" class="mode-option-btn" data-count="24">
+            <strong>🏆 Todas las 24 Preguntas</strong>
+            <small>Todos los ejercicios de las 4 hojas</small>
+          </button>
+        </div>
+      </div>
+
+      <div class="config-section">
+        <label class="section-label">👕 3. Personaliza tu Personaje Roblox:</label>
+        <div class="avatar-colors">
+          <button type="button" class="skin-btn selected">🟦 Clásico Noob</button>
+          <button type="button" class="skin-btn">🟥 Súper Gamer</button>
+          <button type="button" class="skin-btn">🟪 Mago Galáctico</button>
+          <button type="button" class="skin-btn">🟩 Explorador Esmeralda</button>
+        </div>
+      </div>
+
+      <button id="btn-start-game" class="primary-play-btn" type="button">
+        🎮 ¡COMENZAR PRÁCTICA AHORA!
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================================================================
+       2. MODAL DE PREGUNTA (NO SE PUEDE SALTAR, MARCAR CON X)
+       ================================================================== -->
+  <div id="question-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="question-top-bar">
+        <span id="q-badge-text" class="q-badge">Tiempo ⏰ • Pregunta 1 de 10</span>
+        <span id="q-mode-pill" class="q-mode-tag practice">📘 Práctica</span>
+        <span class="q-lock-notice">🔒 Debes contestar para avanzar</span>
+      </div>
+
+      <div id="q-title-text" class="q-title">Conversión de Minutos a Segundos</div>
+      <h3 id="q-stem-text" class="q-stem">¿Cuál es el resultado de convertir 12 minutos a segundos?</h3>
+
+      <div id="q-visual-text" class="q-visual-aid">
+        Escalera: Minuto ➔ ( × 60 ) ➔ Segundo
+      </div>
+
+      <div class="x-instruction">
+        👉 Haz clic en un cuadro para <strong>marcar con una</strong> <span class="x-demo">X</span> la respuesta correcta:
+      </div>
+
+      <!-- Lista de opciones con casilla [ X ] -->
+      <div id="q-options-list" class="options-list"></div>
+
+      <!-- Aviso cuando está en Modo Examen (Sin pistas ni fichas) -->
+      <div id="q-exam-lock-banner" class="exam-no-help-banner hidden">
+        🎓 <strong>Modo Examen Oficial activo:</strong> Las pistas y las fichas de estudio están desactivadas para evaluar tus conocimientos.
+      </div>
+
+      <!-- Botones de Pista, Ver Ficha y Confirmar Respuesta -->
+      <div id="q-actions-row" class="question-actions-row">
+        <button id="btn-show-hint" class="hint-btn" type="button">
+          💡 ¿No sabes? Pedir Pista
+        </button>
+        <button id="btn-peek-sheet-q" class="sheet-peek-btn" type="button">
+          📖 Ver Ficha de Materia
+        </button>
+        <button id="btn-submit-answer" class="submit-answer-btn" type="button" disabled>
+          ✅ Confirmar Respuesta con X
+        </button>
+      </div>
+
+      <!-- Caja donde aparece la pista cuando el estudiante pide ayuda -->
+      <div id="q-hint-box" class="hint-box hidden"></div>
+
+      <!-- Caja de Retroalimentación: explica por qué estaba mala/buena y da truco para memorizar -->
+      <div id="q-feedback-box" class="feedback-box hidden">
+        <div id="q-feedback-header" class="feedback-header"></div>
+        <div id="q-feedback-explanation" class="feedback-explanation"></div>
+        <div id="q-feedback-memory" class="feedback-memory"></div>
+        <button id="btn-continue-obby" class="continue-btn" type="button">
+          🚀 ¡Entendido! Desbloquear Barrera y Seguir Avanzando ➔
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================================
+       3. MODAL DE HOJAS DE MATERIA (SOLO DISPONIBLE EN MODO PRÁCTICA)
+       ================================================================== -->
+  <div id="study-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="question-top-bar">
+        <span class="q-badge">📚 Fichas de Estudio Oficiales (Modo Práctica)</span>
+        <button id="btn-close-study" class="hud-btn hud-btn-sound" type="button">✖ Cerrar Fichas</button>
+      </div>
+      <p style="font-size: 14px; font-weight: 700; color: #475569;">
+        Aquí puedes consultar tus hojas de materia para repasar las fórmulas y tablas:
+      </p>
+
+      <div class="sheets-tabs">
+        <button type="button" class="sheet-tab-btn active" data-sheet-index="0">⏰ 1. Tiempo</button>
+        <button type="button" class="sheet-tab-btn" data-sheet-index="1">🌡️ 2. Temperatura</button>
+        <button type="button" class="sheet-tab-btn" data-sheet-index="2">✨ 3. Expresiones</button>
+        <button type="button" class="sheet-tab-btn" data-sheet-index="3">🏰 4. Repaso en Tablas</button>
+      </div>
+
+      <div class="sheet-image-wrapper">
+        <img id="study-sheet-img" src="assets/hoja_tiempo.jpg" alt="Hoja de estudio de Matemáticas" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================================
+       4. MODAL DE BOLETA FINAL (NOTA, MODALIDAD, PISTAS, FICHAS Y REPASO)
+       ================================================================== -->
+  <div id="final-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="start-header">
+        <span id="final-mode-badge" class="start-badge">🏁 Resultado Final</span>
+        <h2 id="final-completion-banner" class="completion-status-title">
+          ¡Tu práctica fue concluida con éxito!
+        </h2>
+        <p id="final-message-sub">Aquí tienes tu calificación final y el reporte completo de tu desempeño.</p>
+      </div>
+
+      <div id="final-grade-circle" class="grade-circle">
+        <span id="final-grade-number" class="grade-number">100</span>
+        <span class="grade-label">Nota / 100</span>
+      </div>
+
+      <div class="final-stats-grid">
+        <div class="final-stat-box good">
+          <span id="final-good-count" class="big-num">10</span>
+          ✅ Buenas
+        </div>
+        <div class="final-stat-box bad">
+          <span id="final-bad-count" class="big-num">0</span>
+          ❌ Malas
+        </div>
+        <div class="final-stat-box total">
+          <span id="final-total-count" class="big-num">10 / 10</span>
+          📊 Total
+        </div>
+      </div>
+
+      <!-- REPORTE DE USO DE PISTAS Y CONSULTA DE FICHAS -->
+      <div id="final-help-audit-box" class="help-audit-box">
+        <h3 id="final-audit-title" class="help-audit-title">
+          🔎 Reporte de Ayudas Utilizadas (Pistas y Fichas)
+        </h3>
+        <div id="final-audit-content" class="help-audit-content"></div>
+      </div>
+
+      <label class="section-label" style="display:block; font-weight:900; margin-bottom:8px; font-size:14px;">
+        📋 Revisión Paso a Paso de tus Respuestas:
+      </label>
+      <div id="final-review-list" class="review-list"></div>
+
+      <div class="final-buttons-row">
+        <button id="btn-retry-wrong" class="hint-btn hidden" type="button" style="flex:1; justify-content:center;">
+          🔄 Repetir solo las que tuve malas
+        </button>
+        <button id="btn-switch-to-exam" class="exam-launch-btn hidden" type="button" style="flex:1;">
+          🎓 ¡Ir al Examen Oficial (Sin Ayudas)!
+        </button>
+        <button id="btn-play-again" class="primary-play-btn" type="button" style="flex:1;">
+          🎮 Jugar de Nuevo
+        </button>
+        <button id="btn-change-mode" class="sheet-peek-btn" type="button">
+          ⚙️ Menú Principal
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Librería Three.js local + Banco de Preguntas + Lógica del Juego -->
+  <script src="assets/three.min.js"></script>
+  <script src="questions.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
